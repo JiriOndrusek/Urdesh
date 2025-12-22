@@ -47,24 +47,32 @@ function resetTimer() {
 }
 
 // Button actions for adding time and toggling color
-document.getElementById('plus-five').addEventListener('click', () => {
+document.getElementById('plus-five').addEventListener('click', function() {
     timer += 5 * 60; // Add 5 minutes
     setCookie('timer', timer, 1); // Update cookie
     displayTime();
+
+    // Toggle to red once and disable further toggling
+    if (this.style.backgroundImage.includes('button-green.png')) {
+        this.style.backgroundImage = "url('images/button-red.png')";
+    }
 });
 
-// Button color toggle
-function toggleColor(button) {
-    button.style.backgroundImage = button.style.backgroundImage.includes('button-red.png') ?
-    'url(images/button-blue.png)' : 'url(images/button-red.png)';
+// Button state toggle (toggle between red and blue)
+function toggleButton(button) {
+    if (button.style.backgroundImage.includes('button-red.png')) {
+        button.style.backgroundImage = "url('images/button-blue.png')";
+    } else {
+        button.style.backgroundImage = "url('images/button-red.png')";
+    }
 }
 
 document.getElementById('auspex').addEventListener('click', function() {
-    toggleColor(this);
+    toggleButton(this);
 });
 
 document.getElementById('main-coms').addEventListener('click', function() {
-    toggleColor(this);
+    toggleButton(this);
 });
 
 // Start/reset the timer using double-click
