@@ -112,7 +112,11 @@ timeEl.addEventListener("click", () => {
       update();
     }
   } else {
-    start();
+    if(running) {
+      stop();
+    } else {
+      start();
+    }
   }
   lastTap = now;
 });
@@ -122,7 +126,6 @@ timeEl.addEventListener("click", () => {
 function button1Handler() {
   seconds += 5 * 60;
   update();
-  start();
   button1.classList.add("hidden");
   button1Clicked.classList.remove("hidden");
   button1.onclick = null;
@@ -146,6 +149,26 @@ button3Toggled.onclick = () => {
   button3Toggled.classList.toggle("hidden");
   saveState();
 };
+
+let counterA = parseInt(localStorage.getItem("counterA") || 0);
+let counterB = parseInt(localStorage.getItem("counterB") || 0);
+
+const counterAValue = document.getElementById("counterAValue");
+const counterBValue = document.getElementById("counterBValue");
+
+function updateCounters() {
+  counterAValue.textContent = counterA;
+  counterBValue.textContent = counterB;
+  localStorage.setItem("counterA", counterA);
+  localStorage.setItem("counterB", counterB);
+}
+
+document.getElementById("counterAPlus").onclick = () => { counterA++; updateCounters(); };
+document.getElementById("counterAMinus").onclick = () => { counterA--; updateCounters(); };
+document.getElementById("counterBPlus").onclick = () => { counterB++; updateCounters(); };
+document.getElementById("counterBMinus").onclick = () => { counterB--; updateCounters(); };
+
+updateCounters();
 
 /* ---------- Init ---------- */
 loadState();
