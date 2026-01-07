@@ -1,89 +1,156 @@
-// Utility to manage cookies
-function setCookie(name, value, days) {
-    const date = new Date();
-    date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
-    document.cookie = name + "=" + value + ";expires=" + date.toUTCString() + ";path=/";
+
+let seconds = 20 * 60;
+let running = false;
+let interval = null;
+let endTimestamp = null;
+let lastTap = 0;
+
+const timeEl = document.getElementById("time");
+
+const button1 = document.getElementById("button1");
+const button1Clicked = document.getElementById("button1Clicked");
+
+const button2 = document.getElementById("button2");
+const button2Toggled = document.getElementById("button2Toggled");
+
+const button3 = document.getElementById("button3");
+const button3Toggled = document.getElementById("button3Toggled");
+
+/* ---------- Persistence ---------- */
+function saveState() {
+  localStorage.setItem("seconds", seconds);
+  localStorage.setItem("running", running);
+  localStorage.setItem("endTimestamp", endTimestamp);
+  localStorage.setItem("button1State", button1.classList.contains("hidden") ? "clicked" : "default");
+  localStorage.setItem("button2State", button2Toggled.classList.contains("hidden") ? "default" : "toggled");
+  localStorage.setItem("button3State", button3Toggled.classList.contains("hidden") ? "default" : "toggled");
 }
 
-function getCookie(name) {
-    const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
-    if (match) return match[2];
-    return null;
+function loadState() {
+  if (localStorage.getItem("seconds"))
+    seconds = parseInt(localStorage.getItem("seconds"));
+
+  running = localStorage.getItem("running") === "true";
+  endTimestamp = localStorage.getItem("endTimestamp");
+
+  if (localStorage.getItem("button1State") === "clicked") {
+    button1.classList.add("hidden");
+    button1Clicked.classList.remove("hidden");
+    button1.onclick = null;
+  }
+
+  if (localStorage.getItem("button2State") === "toggled") {
+    button2Toggled.classList.remove("hidden");
+  }
+
+  if (localStorage.getItem("button3State") === "toggled") {
+    button3Toggled.classList.remove("hidden");
+  }
+
+  if (running && endTimestamp) {
+    seconds = Math.max(0, Math.floor((endTimestamp - Date.now()) / 1000));
+  }
 }
 
-// Load timer state from cookies
-let timer = getCookie('timer') ? parseInt(getCookie('timer')) : 20 * 60; // Default to 20 minutes
-let interval;
-
-// Functions to display time and start/reset timer
-function displayTime() {
-    const minutes = Math.floor(timer / 60);
-    const seconds = timer % 60;
-    document.getElementById('timer-display').textContent =
-    `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+/* ---------- Display ---------- */
+function update() {
+  const m = Math.floor(seconds / 60);
+  const s = seconds % 60;
+  timeEl.textContent =
+    String(m).padStart(2, "0") + ":" + String(s).padStart(2, "0");
+  saveState();
 }
 
-function startTimer() {
-    if (interval) return; // Prevent starting multiple intervals
-    interval = setInterval(() => {
-        timer--;
-        setCookie('timer', timer, 1); // Save timer state
-        displayTime();
-        if (timer <= 0) {
-            clearInterval(interval);
-            interval = null;
-            // Optionally, you might want to delete the cookie when timer ends
-            setCookie('timer', '', -1); // Delete cookie after timer expires
-        }
-    }, 1000);
+/* ---------- Timer ---------- */
+function start(resume = false) {
+  if (interval) clearInterval(interval);
+
+  running = true;
+  if (!resume) {
+    endTimestamp = Date.now() + seconds * 1000;
+  }
+
+  interval = setInterval(tick, 1000);
+  tick();
 }
 
-function resetTimer() {
-    clearInterval(interval);
-    interval = null;
-    timer = 20 * 60; // Reset to 20 minutes
-    setCookie('timer', timer, 1); // Update cookie with new timer value
-    displayTime();
+function tick() {
+  if (!running || !endTimestamp) return;
+
+  seconds = Math.max(0, Math.floor((endTimestamp - Date.now()) / 1000));
+  update();
+
+  if (seconds <= 0) finish();
 }
 
-// Button actions for adding time and toggling color
-document.getElementById('plus-five').addEventListener('click', function() {
-    timer += 5 * 60; // Add 5 minutes
-    setCookie('timer', timer, 1); // Update cookie
-    displayTime();
+function stop() {
+  running = false;
+  clearInterval(interval);
+  interval = null;
+  endTimestamp = null;
+  saveState();
+}
 
-    // Toggle to red once and disable further toggling
-    if (this.style.backgroundImage.includes('button-green.png')) {
-        this.style.backgroundImage = "url('images/button-red.png')";
+function finish() {
+  stop();
+  timeEl.classList.add("finished");
+}
+
+/* ---------- Interactions ---------- */
+timeEl.addEventListener("click", () => {
+  const now = Date.now();
+  if (now - lastTap < 350) {
+    if (confirm("Reset timer to 20:00?")) {
+      stop();
+      seconds = 20 * 60;
+      timeEl.classList.remove("finished");
+
+      button1.classList.remove("hidden");
+      button1Clicked.classList.add("hidden");
+      button1.onclick = button1Handler;
+
+      update();
     }
+  } else {
+    start();
+  }
+  lastTap = now;
 });
 
-// Button state toggle (toggle between red and blue)
-function toggleButton(button) {
-    if (button.style.backgroundImage.includes('button-red.png')) {
-        button.style.backgroundImage = "url('images/button-blue.png')";
-    } else {
-        button.style.backgroundImage = "url('images/button-red.png')";
-    }
+/* ---------- Buttons ---------- */
+
+function button1Handler() {
+  seconds += 5 * 60;
+  update();
+  start();
+  button1.classList.add("hidden");
+  button1Clicked.classList.remove("hidden");
+  button1.onclick = null;
 }
+button1.onclick = button1Handler;
 
-document.getElementById('auspex').addEventListener('click', function() {
-    toggleButton(this);
-});
+button2.onclick = () => {
+  button2Toggled.classList.toggle("hidden");
+  saveState();
+};
+button2Toggled.onclick = () => {
+  button2Toggled.classList.toggle("hidden");
+  saveState();
+};
 
-document.getElementById('main-coms').addEventListener('click', function() {
-    toggleButton(this);
-});
+button3.onclick = () => {
+  button3Toggled.classList.toggle("hidden");
+  saveState();
+};
+button3Toggled.onclick = () => {
+  button3Toggled.classList.toggle("hidden");
+  saveState();
+};
 
-// Start/reset the timer using double-click
-const timerDisplay = document.getElementById('timer-display');
-timerDisplay.addEventListener('click', () => {
-    startTimer();
-});
+/* ---------- Init ---------- */
+loadState();
+update();
 
-timerDisplay.addEventListener('dblclick', () => {
-    resetTimer();
-});
-
-// Initialize display on page load
-displayTime();
+if (running && seconds > 0 && endTimestamp) {
+  start(true);
+}

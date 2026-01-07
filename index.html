@@ -1,19 +1,27 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Styled Timer</title>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <title>Timer Panel</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="container">
-        <div class="timer-display" id="timer-display">20:00</div>
-        <button class="plus-five" id="plus-five">+5 MINS</button>
-        <button class="toggle-button auspex" id="auspex">AUSPEX</button>
-        <button class="toggle-button main-coms" id="main-coms">MAIN COMS</button>
-    </div>
+  <div id="panel">
+    <div id="time">20:00</div>
 
-    <script src="script.js"></script>
+    <!-- Button 1: green -> red (one-shot) -->
+    <img id="button1" src="green.png" class="btn">
+    <img id="button1Clicked" src="red.png" class="btn hidden">
+
+    <!-- Button 2: blue <-> red -->
+    <img id="button2" src="blue.png" class="btn">
+    <img id="button2Toggled" src="red.png" class="btn hidden">
+
+    <!-- Button 3: red <-> blue -->
+    <img id="button3" src="red.png" class="btn">
+    <img id="button3Toggled" src="blue.png" class="btn hidden">
+  </div>
+  <script src="script.js"></script>
 </body>
 </html>
