@@ -102,7 +102,7 @@ timeEl.addEventListener("click", () => {
   if (now - lastTap < 350) {
     if (confirm("Reset timer to 20:00?")) {
       stop();
-      seconds = 20 * 60;
+      seconds = 20 ;
       timeEl.classList.remove("finished");
 
       button1.classList.remove("hidden");
@@ -112,11 +112,7 @@ timeEl.addEventListener("click", () => {
       update();
     }
   } else {
-    if(running) {
-      stop();
-    } else {
       start();
-    }
   }
   lastTap = now;
 });
@@ -125,6 +121,7 @@ timeEl.addEventListener("click", () => {
 
 function button1Handler() {
   seconds += 5 * 60;
+  endTimestamp = Date.now() + seconds * 1000;
   update();
   button1.classList.add("hidden");
   button1Clicked.classList.remove("hidden");
