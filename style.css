@@ -31,7 +31,7 @@ body {
   transition: opacity 0.3s ease;
 }
 
-#button1, #button1Clicked {
+#button1, #button1Clicked1, #button1Clicked2 {
   top: 60%;
   left: 36%;
 }

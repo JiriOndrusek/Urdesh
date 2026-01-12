@@ -8,7 +8,9 @@ let lastTap = 0;
 const timeEl = document.getElementById("time");
 
 const button1 = document.getElementById("button1");
-const button1Clicked = document.getElementById("button1Clicked");
+const button1Clicked1 = document.getElementById("button1Clicked1");
+const button1Clicked2 = document.getElementById("button1Clicked2");
+
 
 const button2 = document.getElementById("button2");
 const button2Toggled = document.getElementById("button2Toggled");
@@ -21,7 +23,7 @@ function saveState() {
   localStorage.setItem("seconds", seconds);
   localStorage.setItem("running", running);
   localStorage.setItem("endTimestamp", endTimestamp);
-  localStorage.setItem("button1State", button1.classList.contains("hidden") ? "clicked" : "default");
+  localStorage.setItem("button1State", button1.classList.contains("hidden") ? button1Clicked1.classList.contains("hidden") ? "clicked2" : "clicked1" : "default");
   localStorage.setItem("button2State", button2Toggled.classList.contains("hidden") ? "default" : "toggled");
   localStorage.setItem("button3State", button3Toggled.classList.contains("hidden") ? "default" : "toggled");
 }
@@ -33,10 +35,22 @@ function loadState() {
   running = localStorage.getItem("running") === "true";
   endTimestamp = localStorage.getItem("endTimestamp");
 
-  if (localStorage.getItem("button1State") === "clicked") {
+  if (localStorage.getItem("button1State") === "clicked1") {
     button1.classList.add("hidden");
-    button1Clicked.classList.remove("hidden");
+    button1Clicked1.classList.remove("hidden");
+    button1Clicked2.classList.add("hidden");
     button1.onclick = null;
+    button1Clicked2.onclick = null;
+  } else if (localStorage.getItem("button1State") === "clicked2") {
+    button1.classList.add("hidden");
+    button1Clicked1.classList.add("hidden");
+    button1Clicked2.classList.remove("hidden");
+    button1.onclick = null;
+    button1Clicked1.onclick = null;
+  } else {
+    button1.classList.remove("hidden");
+    button1Clicked1.classList.add("hidden");
+    button1Clicked2.classList.add("hidden");
   }
 
   if (localStorage.getItem("button2State") === "toggled") {
@@ -106,8 +120,9 @@ timeEl.addEventListener("click", () => {
       timeEl.classList.remove("finished");
 
       button1.classList.remove("hidden");
-      button1Clicked.classList.add("hidden");
-      button1.onclick = button1Handler;
+      button1Clicked1.classList.add("hidden");
+      button1Clicked2.classList.add("hidden");
+      button1.onclick = button1Click1Handler;
 
       update();
     }
@@ -119,15 +134,28 @@ timeEl.addEventListener("click", () => {
 
 /* ---------- Buttons ---------- */
 
-function button1Handler() {
+function button1Click1Handler() {
   seconds += 5 * 60;
   endTimestamp = Date.now() + seconds * 1000;
-  update();
   button1.classList.add("hidden");
-  button1Clicked.classList.remove("hidden");
+  button1Clicked2.classList.add("hidden");
+  button1Clicked1.classList.remove("hidden");
   button1.onclick = null;
+  button1Clicked1.onclick = button1Click2Handler;
+  update();
 }
-button1.onclick = button1Handler;
+
+function button1Click2Handler() {
+  seconds += 5 * 60;
+  endTimestamp = Date.now() + seconds * 1000;
+  button1.classList.add("hidden");
+  button1Clicked1.classList.add("hidden");
+  button1Clicked2.classList.remove("hidden");
+  button1Clicked1.onclick = null;
+  update();
+}
+button1.onclick = button1Click1Handler;
+button1Clicked1.onclick = button1Click2Handler;
 
 button2.onclick = () => {
   button2Toggled.classList.toggle("hidden");
