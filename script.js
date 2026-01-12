@@ -102,7 +102,7 @@ timeEl.addEventListener("click", () => {
   if (now - lastTap < 350) {
     if (confirm("Reset timer to 20:00?")) {
       stop();
-      seconds = 20 ;
+      seconds = 20 * 60;
       timeEl.classList.remove("finished");
 
       button1.classList.remove("hidden");
@@ -174,3 +174,49 @@ update();
 if (running && seconds > 0 && endTimestamp) {
   start(true);
 }
+
+const timeInput = document.getElementById("timeInput");
+const timeText = document.getElementById("time");
+
+/* --- Enter edit mode --- */
+timeText.addEventListener("contextmenu", (e) => {
+  e.preventDefault();
+  stop(); // stop timer when editing
+  timeInput.value = timeText.textContent;
+  timeText.classList.add("hidden");
+  timeInput.classList.remove("hidden");
+  timeInput.focus();
+});
+
+/* --- Parse input --- */
+function parseTime(value) {
+  const parts = value.split(":").map(Number);
+  if (parts.some(isNaN)) return null;
+
+  if (parts.length === 2) {
+    return parts[0] * 60 + parts[1];
+  }
+  if (parts.length === 3) {
+    return parts[0] * 3600 + parts[1] * 60 + parts[2];
+  }
+  return null;
+}
+
+/* --- Apply value --- */
+timeInput.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") {
+    const newSeconds = parseTime(timeInput.value);
+    if (newSeconds !== null && newSeconds >= 0) {
+      seconds = newSeconds;
+      update();
+    }
+    timeInput.classList.add("hidden");
+    timeText.classList.remove("hidden");
+  }
+
+  if (e.key === "Escape") {
+    timeInput.classList.add("hidden");
+    timeText.classList.remove("hidden");
+  }
+});
+

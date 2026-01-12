@@ -102,3 +102,24 @@ body {
   position: relative;
   margin-bottom: 10px;
 }
+
+#timeContainer {
+  position: absolute;
+  top: 41%;
+  left: 26%;
+  transform: translate(-50%, -50%);
+}
+
+#timeInput {
+  width: 180px;
+  font-size: 48px;
+  font-family: monospace;
+  background: black;
+  color: #eaeaea;
+  border: 1px solid #555;
+  text-align: center;
+}
+
+#timeInput.hidden {
+  display: none;
+}
